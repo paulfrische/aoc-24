@@ -1,7 +1,4 @@
-use std::{
-    cmp::Reverse,
-    collections::{BinaryHeap, HashMap},
-};
+use std::collections::{BinaryHeap, HashMap};
 
 use anyhow::anyhow;
 use nom::{
@@ -60,8 +57,8 @@ fn part1(input: &str) -> anyhow::Result<u64> {
         let (rest, (na, nb)) = parse_collumn(input).map_err(|e| anyhow!("{}", e))?;
         input = rest;
 
-        left.push(Reverse(na));
-        right.push(Reverse(nb));
+        left.push(na);
+        right.push(nb);
 
         if input.is_empty() || input == "\n" {
             break;
@@ -71,7 +68,7 @@ fn part1(input: &str) -> anyhow::Result<u64> {
     Ok(left
         .into_sorted_iter()
         .zip(right.into_sorted_iter())
-        .map(|(Reverse(a), Reverse(b))| a.abs_diff(b))
+        .map(|(a, b)| a.abs_diff(b))
         .fold(0, |a, b| a + b))
 }
 
