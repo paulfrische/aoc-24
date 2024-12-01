@@ -10,6 +10,28 @@ use nom::{
     multi::{many0, many1},
 };
 
+struct SortedHeapIterator<T> {
+    heap: BinaryHeap<T>,
+}
+
+impl<T: Ord> Iterator for SortedHeapIterator<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.heap.pop()
+    }
+}
+
+trait IntoIteratorSorted<T> {
+    fn into_sorted_iter(self) -> SortedHeapIterator<T>;
+}
+
+impl<T> IntoIteratorSorted<T> for BinaryHeap<T> {
+    fn into_sorted_iter(self) -> SortedHeapIterator<T> {
+        SortedHeapIterator { heap: self }
+    }
+}
+
 fn main() -> anyhow::Result<()> {
     println!("part1: {}", part1(include_str!("input.txt"))?);
     println!("part2: {}", part2(include_str!("input.txt"))?);
@@ -46,12 +68,11 @@ fn part1(input: &str) -> anyhow::Result<u64> {
         }
     }
 
-    let mut sum = 0;
-    while !left.is_empty() {
-        sum += left.pop().unwrap().0.abs_diff(right.pop().unwrap().0);
-    }
-
-    Ok(sum)
+    Ok(left
+        .into_sorted_iter()
+        .zip(right.into_sorted_iter())
+        .map(|(Reverse(a), Reverse(b))| a.abs_diff(b))
+        .fold(0, |a, b| a + b))
 }
 
 fn part2(input: &str) -> anyhow::Result<u64> {
